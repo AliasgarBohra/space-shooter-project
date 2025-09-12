@@ -67,6 +67,7 @@ public class GameplayHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
             isGameEnded = false;
             codeText.transform.parent.gameObject.SetActive(false);
         }
+        GameLife.Instance.isGameplayedFirstTime = true;
     }
     public override void Spawned()
     {
@@ -94,8 +95,9 @@ public class GameplayHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
         if (!safeLeave)
         {
             WebGLMatchBootstrap.Instance.OnMatchAbort_Report("Match Terminated!", "Something went wrong!");
+
+            GoToHome();
         }
-        GoToHome();
     }
     public void PlayerJoined(PlayerRef player)
     {
@@ -237,21 +239,24 @@ public class GameplayHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
     {
         safeLeave = true;
 
-        WebGLMatchBootstrap.Instance.ResetURL();
-
-        if (GameManager.Instance.isMultiplayer && Runner != null)
+        try
         {
-            Runner.Shutdown();
+            WebGLMatchBootstrap.Instance.ResetURL();
+
+            if (GameManager.Instance.isMultiplayer && Runner != null)
+            {
+                Runner.Shutdown();
+            }
+            if (FusionLauncher.Instance != null)
+                Destroy(FusionLauncher.Instance.gameObject);
+
+            GameManager.Instance = null;
         }
-        if (FusionLauncher.Instance != null)
-            Destroy(FusionLauncher.Instance.gameObject);
+        catch (System.Exception e)
+        {
+            Debug.Log(e);
+        }
 
-        GameManager.Instance = null;
-
-        Invoke(nameof(LoadScene), 0.1f);
-    }
-    private void LoadScene()
-    {
         SceneManager.LoadScene("Menu");
     }
     #endregion

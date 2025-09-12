@@ -46,6 +46,10 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
 
     private async void TryHandleUrlParamsAndStart()
     {
+        if (GameLife.Instance.isGameplayedFirstTime)
+        {
+            return;
+        }
         ParseUrlParams();
 
         if (string.IsNullOrEmpty(matchId))
@@ -118,9 +122,12 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
         playerId = "";
         opponentId = "";
 
-        GameManager.Instance.matchId = "";
-        GameManager.Instance.playerId = "";
-        GameManager.Instance.opponentId = "";
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.matchId = "";
+            GameManager.Instance.playerId = "";
+            GameManager.Instance.opponentId = "";
+        }
 
         string url = BASE_URL;
 
