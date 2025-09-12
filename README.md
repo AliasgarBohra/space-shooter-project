@@ -1,8 +1,8 @@
-# 🚀 Space Shooter (WebGL Multiplayer)
+# Space Shooter
 
 A multiplayer space shooter game built with **Unity 6** and **Photon Fusion 2**, playable directly in the browser.  
 The game is hosted here:  
-[Play Now](https://aliasgarbohra.github.io/space-shooter/)
+[Play](https://aliasgarbohra.github.io/space-shooter/)
 
 ---
 
