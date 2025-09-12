@@ -65,7 +65,7 @@ public class GameplayHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
             StartTimer();
 
             isGameEnded = false;
-            codeText.transform.parent.gameObject.SetActive(false);
+            //codeText.transform.parent.gameObject.SetActive(false);
         }
         GameLife.Instance.isGameplayedFirstTime = true;
     }
@@ -78,7 +78,7 @@ public class GameplayHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
         isSpawned = true;
         codeText.text = "CODE: " + Runner.SessionInfo.Name;
 
-        shareableURLButton.SetActive(!string.IsNullOrEmpty(WebGLMatchBootstrap.Instance.shareableLink));
+        //shareableURLButton.SetActive(!string.IsNullOrEmpty(WebGLMatchBootstrap.Instance.shareableLink));
     }
     [Rpc]
     private void RPC_StartGame(int seed)
