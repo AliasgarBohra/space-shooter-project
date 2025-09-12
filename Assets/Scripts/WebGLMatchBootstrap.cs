@@ -25,9 +25,14 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
     private string playerId;
     private string opponentId;
 
+    private const string BASE_URL = "https://aliasgarbohra.github.io/space-shooter";
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
-    private static extern void PostMatchMessageJS(string json); // implemented in .jslib (recommended)
+    private static extern void PostMatchMessageJS(string json);
+
+    [DllImport("__Internal")]
+    private static extern void SetBrowserUrl(string url);
 #endif
 
     private void Awake()
@@ -89,7 +94,6 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
         dict.TryGetValue("playerId", out playerId);
         dict.TryGetValue("opponentId", out opponentId);
 
-        // Save these into your GameManager / local data so your game can use them
         if (!string.IsNullOrEmpty(playerId)) GameManager.Instance.playerId = playerId;
         if (!string.IsNullOrEmpty(opponentId)) GameManager.Instance.opponentId = opponentId;
         if (!string.IsNullOrEmpty(matchId)) GameManager.Instance.matchId = matchId;
@@ -99,7 +103,7 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
     public string shareableLink;
     public void GenerateAndSetShareLink(string matchId, string playerId, string opponentId)
     {
-        shareableLink = $"https://aliasgarbohra.github.io/space-shooter/?matchId={matchId}&playerId={playerId}&opponentId={opponentId}";
+        shareableLink = $"{BASE_URL}/?matchId={matchId}&playerId={playerId}&opponentId={opponentId}";
         //Debug.Log("Share this match link: " + url);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -109,18 +113,13 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
     public void ResetURL()
     {
         shareableLink = "";
-        string url = $"https://aliasgarbohra.github.io/space-shooter";
+        string url = BASE_URL;
         //Debug.Log("Share this match link: " + url);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     SetBrowserUrl(url);
 #endif
     }
-
-#if UNITY_WEBGL && !UNITY_EDITOR
-[DllImport("__Internal")]
-private static extern void SetBrowserUrl(string url);
-#endif
 
     private async Task<bool> TryJoinSession(string sessionName)
     {

@@ -3476,10 +3476,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c80578893a4db724790594da70588d75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isMultiplayer: 0
-  matchId: 
-  playerId: 
-  opponentId: 
 --- !u!114 &1908886331
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3493,7 +3489,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runnerPrefab: {fileID: 2782645631553394445, guid: 099e465779f36194d90603f3722cd366, type: 3}
-  runner: {fileID: 0}
   loadingPanel: {fileID: 1851157206}
   codeField: {fileID: 2012873591}
 --- !u!114 &1908886332
@@ -4126,8 +4121,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1908886330}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+      - m_Target: {fileID: 1908886331}
+        m_TargetAssemblyTypeName: FusionLauncher, Assembly-CSharp
         m_MethodName: StartMultiplayer
         m_Mode: 1
         m_Arguments:
