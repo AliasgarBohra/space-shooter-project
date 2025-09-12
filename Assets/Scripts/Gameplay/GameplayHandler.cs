@@ -239,6 +239,8 @@ public class GameplayHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
         GameManager.Instance = null;
 
         SceneManager.LoadScene("Menu");
+
+        WebGLMatchBootstrap.Instance.ResetURL();
     }
     #endregion
 

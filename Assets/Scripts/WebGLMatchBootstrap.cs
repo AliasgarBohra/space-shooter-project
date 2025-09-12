@@ -25,7 +25,7 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
     private string playerId;
     private string opponentId;
 
-    private const string BASE_URL = "https://aliasgarbohra.github.io/space-shooter";
+    private const string BASE_URL = "https://aliasgarbohra.github.io/space-shooter/";
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
@@ -103,7 +103,7 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
     public string shareableLink;
     public void GenerateAndSetShareLink(string matchId, string playerId, string opponentId)
     {
-        shareableLink = $"{BASE_URL}/?matchId={matchId}&playerId={playerId}&opponentId={opponentId}";
+        shareableLink = $"{BASE_URL}?matchId={matchId}&playerId={playerId}&opponentId={opponentId}";
         //Debug.Log("Share this match link: " + url);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
