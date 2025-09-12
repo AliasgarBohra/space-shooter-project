@@ -48,6 +48,7 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (GameLife.Instance.isGameplayedFirstTime)
         {
+            ResetURL();
             return;
         }
         ParseUrlParams();
@@ -68,7 +69,9 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
         bool joined = await TryJoinSession(matchId);
         if (!joined)
         {
-            await CreateSession(matchId);
+            Toast.Show("Join URL has been expired!");
+            ResetURL();
+            //await CreateSession(matchId);
         }
     }
 
