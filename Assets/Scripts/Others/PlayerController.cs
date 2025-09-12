@@ -73,12 +73,11 @@ public class PlayerController : MonoBehaviour
         if (isEliminated)
             return;
 
-        // Create oscillation between minWidth and maxWidth
         float t = (Mathf.Sin(Time.time * pulseSpeed * Mathf.PI * 2f) + 1f) / 2f;
         float width = Mathf.Lerp(minWidth, maxWidth, t);
 
         trailRend.startWidth = width;
-        trailRend.endWidth = width * 0.5f; // taper to smaller end
+        trailRend.endWidth = width * 0.5f;
     }
     private void FixedUpdate()
     {
@@ -97,12 +96,10 @@ public class PlayerController : MonoBehaviour
         Vector2 velocity = rb.linearVelocity;
         velocity.x = forwardSpeed;
 
-        // --- Vertical control ---
         if (isUpPressed)
         {
             if (hitUp.collider != null && hitUp.distance <= halfHeight + snapTolerance)
             {
-                // Snap under ceiling
                 transform.position = new Vector2(pos.x, hitUp.point.y - halfHeight);
                 velocity.y = 0f;
             }
@@ -115,7 +112,6 @@ public class PlayerController : MonoBehaviour
         {
             if (hitDown.collider != null && hitDown.distance <= halfHeight + snapTolerance)
             {
-                // Snap onto ground
                 transform.position = new Vector2(pos.x, hitDown.point.y + halfHeight);
                 velocity.y = 0f;
             }
@@ -127,12 +123,11 @@ public class PlayerController : MonoBehaviour
 
         rb.linearVelocity = velocity;
 
-        // --- Rotation ---
         float targetAngle = groundRotation;
 
         if (isAtCeiling)
         {
-            targetAngle = groundRotation; // flat on ceiling
+            targetAngle = groundRotation;
         }
         else if (isUpPressed)
         {
@@ -144,13 +139,13 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            targetAngle = groundRotation; // flat on ground
+            targetAngle = groundRotation;
         }
 
         float angle = Mathf.LerpAngle(transform.eulerAngles.z, targetAngle, Time.fixedDeltaTime * tiltSpeed);
         transform.rotation = Quaternion.Euler(0, 0, angle);
 
-        // --- Front collision check ---
+
         Vector2 boxCenter = (Vector2)transform.position + frontBoxOffset;
         Collider2D hitFront = Physics2D.OverlapBox(boxCenter, frontBoxSize, 0f, obstacleLayer);
 
@@ -178,7 +173,6 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawLine(pos, pos + Vector2.down * rayDistance);
         Gizmos.DrawLine(pos, pos + Vector2.up * rayDistance);
 
-        // Draw front overlap box
         Gizmos.color = Color.red;
         Vector2 boxCenter = (Vector2)transform.position + frontBoxOffset;
         Gizmos.DrawWireCube(boxCenter, frontBoxSize);
