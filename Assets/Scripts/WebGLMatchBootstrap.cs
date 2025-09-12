@@ -113,7 +113,17 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
     public void ResetURL()
     {
         shareableLink = "";
+
+        matchId = "";
+        playerId = "";
+        opponentId = "";
+
+        GameManager.Instance.matchId = "";
+        GameManager.Instance.playerId = "";
+        GameManager.Instance.opponentId = "";
+
         string url = BASE_URL;
+
         //Debug.Log("Share this match link: " + url);
 
 #if UNITY_WEBGL && !UNITY_EDITOR

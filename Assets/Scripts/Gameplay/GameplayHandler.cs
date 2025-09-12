@@ -217,17 +217,27 @@ public class GameplayHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
     #region Buttons
     public void CopyCode()
     {
-        GUIUtility.systemCopyBuffer = Runner.SessionInfo.Name;
+        TextEditor te = new TextEditor();
+        te.text = Runner.SessionInfo.Name;
+        te.SelectAll();
+        te.Copy();
+
         Toast.Show("Copied");
     }
     public void CopyURL()
     {
-        GUIUtility.systemCopyBuffer = WebGLMatchBootstrap.Instance.shareableLink;
+        TextEditor te = new TextEditor();
+        te.text = WebGLMatchBootstrap.Instance.shareableLink;
+        te.SelectAll();
+        te.Copy();
+
         Toast.Show("Copied URL");
     }
     public void GoToHome()
     {
         safeLeave = true;
+
+        WebGLMatchBootstrap.Instance.ResetURL();
 
         if (GameManager.Instance.isMultiplayer && Runner != null)
         {
@@ -238,9 +248,11 @@ public class GameplayHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
 
         GameManager.Instance = null;
 
+        Invoke(nameof(LoadScene), 0.1f);
+    }
+    private void LoadScene()
+    {
         SceneManager.LoadScene("Menu");
-
-        WebGLMatchBootstrap.Instance.ResetURL();
     }
     #endregion
 
