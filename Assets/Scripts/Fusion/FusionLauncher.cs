@@ -13,9 +13,10 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
     public static FusionLauncher Instance;
 
     [SerializeField] private NetworkRunner runnerPrefab;
-    public NetworkRunner runner;
-
     [SerializeField] private GameObject loadingPanel;
+    [SerializeField] private TMP_InputField codeField;
+
+    public NetworkRunner runner { get; private set; }
 
     private void Awake()
     {
@@ -24,8 +25,21 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
             Instance = this;
         }
     }
+
+    #region Game Creation
+    public async void StartMultiplayer()
+    {
+        loadingPanel.SetActive(true);
+
+        runner = Instantiate(runnerPrefab);
+        runner.AddCallbacks(this);
+
+        await StartGame();
+    }
     private async Task StartGame()
     {
+        GameManager.Instance.isMultiplayer = true;
+
         SceneRef sceneRef = SceneRef.FromIndex(1);
         string matchCode = UnityEngine.Random.Range(100, 999) + "" + UnityEngine.Random.Range(10, 99);
 
@@ -43,7 +57,7 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
             var result = await runner.StartGame(startGameArgs);
             if (result.Ok)
             {
-                Debug.Log("Game started successfully.");
+                //Debug.Log("Game started successfully.");
                 WebGLMatchBootstrap.Instance.GenerateAndSetShareLink(matchCode, "1", "2");
             }
             else
@@ -57,18 +71,9 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
             loadingPanel.SetActive(false);
         }
     }
+    #endregion
 
-    [SerializeField] private TMP_InputField codeField;
-
-    public async void StartMultiplayer()
-    {
-        loadingPanel.SetActive(true);
-
-        runner = Instantiate(runnerPrefab);
-        runner.AddCallbacks(this);
-
-        await StartGame();
-    }
+    #region Game Joining
     public async void JoinWithCode()
     {
         if (string.IsNullOrEmpty(codeField.text))
@@ -89,14 +94,13 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
     {
         loadingPanel.SetActive(true);
 
-        // Configure StartGameArgs for client / join-only
         var startGameArgs = new StartGameArgs()
         {
-            GameMode = GameMode.Shared,               // Shared mode for joining
+            GameMode = GameMode.Shared,
             SessionName = codeField.text,
             SceneManager = runner.GetComponent<NetworkSceneManagerDefault>(),
-            EnableClientSessionCreation = false,     // do NOT allow to create
-            PlayerCount = 2,                          // max players
+            EnableClientSessionCreation = false,
+            PlayerCount = 2,
         };
 
         try
@@ -110,7 +114,7 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
             }
             else
             {
-                Toast.Show(result.ShutdownReason.ToString());  // or "Session does not exist"
+                Toast.Show(result.ShutdownReason.ToString());
                 loadingPanel.SetActive(false);
                 Debug.LogError($"Failed to join game: {result.ShutdownReason}");
             }
@@ -121,15 +125,14 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
             loadingPanel.SetActive(false);
         }
     }
+    #endregion
 
-    // This will be called when Fusion finishes loading the scene
+    #region Callbacks
     public void OnSceneLoadDone(NetworkRunner runner)
     {
         Debug.Log("Scene load finished, hiding loading panel.");
         loadingPanel.SetActive(false);
     }
-
-    // Required for INetworkRunnerCallbacks but not used here
     public void OnSceneLoadStart(NetworkRunner runner) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
@@ -155,7 +158,6 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
-        //runner.Shutdown();
         SceneManager.LoadScene("Menu");
     }
 
@@ -167,4 +169,5 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
     {
 
     }
+    #endregion
 }

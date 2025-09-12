@@ -119,37 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &64393730
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 64393731}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &64393731
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 64393730}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 14.3, y: -0.774382, z: 0}
-  m_LocalScale: {x: 25, y: 12, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &78153312
 GameObject:
   m_ObjectHideFlags: 0
@@ -2075,37 +2044,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &984412648
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 984412649}
-  m_Layer: 0
-  m_Name: Spawnpoint (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &984412649
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 984412648}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -11.25, y: 3, z: 10}
-  m_LocalScale: {x: 25, y: 12, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1000548934
 GameObject:
   m_ObjectHideFlags: 0
@@ -2153,21 +2091,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 353797655027010907, guid: b6a78e34d7d20e54a980e3e647ee87eb, type: 3}
-  singlePlayerSpawnPoint: {fileID: 830125254}
-  SpawnPoint1: {fileID: 984412649}
-  SpawnPoint2: {fileID: 1608465554}
-  enemySpawner: {fileID: 581554635}
   gameDuration: 60
+  singlePlayerSpawnPoint: {fileID: 830125254}
+  enemySpawner: {fileID: 581554635}
   scoreText: {fileID: 1562029493}
   timeText: {fileID: 1721460897}
   codeText: {fileID: 584821866}
   shareableURLButton: {fileID: 0}
-  eliminatedPanel: {fileID: 137279936}
-  gameEndPanel: {fileID: 2085902643}
   waitingPanel: {fileID: 78153312}
   spectatingPanel: {fileID: 380508834}
-  eliminatedPlayers: 0
-  isLocalPlayerEliminated: 0
+  eliminatedPanel: {fileID: 137279936}
+  gameEndPanel: {fileID: 2085902643}
 --- !u!114 &1000548937
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3256,37 +3190,6 @@ Transform:
   - {fileID: 830125254}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1608465553
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1608465554}
-  m_Layer: 0
-  m_Name: Spawnpoint (2)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1608465554
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1608465553}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -11.25, y: -3, z: 10}
-  m_LocalScale: {x: 25, y: 12, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1721460895
 GameObject:
   m_ObjectHideFlags: 0
@@ -3754,9 +3657,6 @@ SceneRoots:
   - {fileID: 426166684}
   - {fileID: 842628057}
   - {fileID: 1521485659}
-  - {fileID: 64393731}
-  - {fileID: 984412649}
-  - {fileID: 1608465554}
   - {fileID: 1587262481}
   - {fileID: 1518110928}
   - {fileID: 1000548935}

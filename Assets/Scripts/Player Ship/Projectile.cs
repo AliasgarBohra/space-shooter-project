@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    public int ownerPlayerId;
-    [SerializeField] private float lifetime = 3f; // seconds until projectile self-destroys
+    [SerializeField] private float lifetime = 3f;
+    public int ownerPlayerId { get; set; }
+
     private void Start()
     {
         Destroy(gameObject, lifetime);

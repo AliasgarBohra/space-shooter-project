@@ -17,7 +17,6 @@ public class Player : NetworkBehaviour
         playerScoreText.text = "Score: " + Score;
     }
 
-    // Expose a controlled setter
     public void AddScore(int amount)
     {
         Score += amount;
