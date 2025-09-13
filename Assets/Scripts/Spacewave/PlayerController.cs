@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -67,7 +68,18 @@ public class PlayerController : MonoBehaviour
 
     private void OnUpPressed(InputAction.CallbackContext ctx) => isUpPressed = true;
     private void OnUpReleased(InputAction.CallbackContext ctx) => isUpPressed = false;
-
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("WinTrigger"))
+        {
+            Win();
+        }
+    }
+    private void Win()
+    {
+        transform.DOScale(0, 0.2f).SetEase(Ease.InOutBounce);
+        Destroy(gameObject, 1);
+    }
     private void Update()
     {
         if (isEliminated)
