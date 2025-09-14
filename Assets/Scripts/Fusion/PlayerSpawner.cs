@@ -11,7 +11,7 @@ public class PlayerSpawner : SimulationBehaviour, IPlayerJoined
         {
             NetworkObject playerObject = Runner.Spawn(
                 PlayerPrefab,
-                new Vector3(-11.25f, Random.Range(-3, 3), 0),
+                new Vector3(-33.32f, Random.Range(-4, 4), 0),
                 PlayerPrefab.transform.rotation,
                 player
             );

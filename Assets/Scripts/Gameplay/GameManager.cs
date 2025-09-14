@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour
     public void StartSinglePlayer()
     {
         isMultiplayer = false;
-        SceneManager.LoadScene("SpaceArena");
+        SceneManager.LoadScene(1);
         WebGLMatchBootstrap.Instance.ResetURL();
     }
 }

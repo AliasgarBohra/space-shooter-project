@@ -325,7 +325,7 @@ public class GameplayHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
         {
             winStat = 2;
         }
-        WebGLMatchBootstrap.Instance.OnMatchEnd_ReportWin(localPlayerScore, winStat);
+        //WebGLMatchBootstrap.Instance.OnMatchEnd_ReportWin(localPlayerScore, winStat);
     }
     #endregion
 }

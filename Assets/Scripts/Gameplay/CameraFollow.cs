@@ -1,10 +1,11 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
 public class CameraFollow : MonoBehaviour
 {
     [Header("Target")]
-    [SerializeField] private Transform player;
+    public Transform player;
 
     [SerializeField] private Transform topWall;
     [SerializeField] private Transform bottomWall;
@@ -20,10 +21,13 @@ public class CameraFollow : MonoBehaviour
 
     private Camera cam;
 
-    private void Start()
+    private IEnumerator Start()
     {
         cam = Camera.main;
         initialZ = transform.position.z;
+
+        yield return new WaitUntil(() => PLayerManager.Local != null);
+        player = PLayerManager.Local.transform;
 
         FitCamera();
     }

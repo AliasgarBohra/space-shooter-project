@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LevelHandler : NetworkBehaviour
+public class LevelHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
 {
     public static LevelHandler Instance;
 
@@ -19,18 +19,41 @@ public class LevelHandler : NetworkBehaviour
     [Space(10)]
     [SerializeField] private View eliminatedPanel;
     [SerializeField] private View gameEndPanel;
+    [SerializeField] private CameraFollow camFollow;
 
-    private bool isGameStarted = false;
+    public bool isGameStarted { get; private set; } = false;
     private bool isGameEnded;
-    private bool isSpawned;
     private bool safeLeave = false;
-    private bool isLocalPlayerEliminated;
+    private bool isLocalPlayerWon = false;
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+        }
+    }
+    private void Start()
+    {
+        if (!GameManager.Instance.isMultiplayer)
+        {
+            Instantiate(playerPrefab, new Vector3(-33.32f, Random.Range(-4, 4), 0),
+                playerPrefab.transform.rotation);
+
+            isGameEnded = false;
+            isGameStarted = true;
+
+            codeText.transform.parent.gameObject.SetActive(false);
+        }
+        GameLife.Instance.isGameplayedFirstTime = true;
+    }
+    private void OnDestroy()
+    {
+        if (!safeLeave)
+        {
+            WebGLMatchBootstrap.Instance.OnMatchAbort_Report("Match Terminated!", "Something went wrong!");
+
+            GoToHome();
         }
     }
 
@@ -40,86 +63,6 @@ public class LevelHandler : NetworkBehaviour
         isGameEnded = false;
         isGameStarted = true;
     }
-
-    #region Callbacks
-    public void PlayerJoined(PlayerRef player)
-    {
-        if (Runner.ActivePlayers.Count() == 2)
-        {
-            if (!isGameStarted && Runner.IsSharedModeMasterClient)
-            {
-                RPC_StartGame();
-
-                isGameEnded = false;
-                isGameStarted = true;
-            }
-            waitingPanel.SetActive(false);
-        }
-    }
-    public void PlayerLeft(PlayerRef player)
-    {
-        if (player != Runner.LocalPlayer)
-        {
-            WebGLMatchBootstrap.Instance.OnMatchAbort_Report("Match Terminated!", "Opponent Left!");
-            GameEnd();
-        }
-    }
-    #endregion
-
-    #region Game End Handler
-    public void OnLocalPlayerDied()
-    {
-        StartCoroutine(OnLocalPlayerDiedCoroutine());
-    }
-    private IEnumerator OnLocalPlayerDiedCoroutine()
-    {
-        spectatingPanel.SetActive(true);
-        isLocalPlayerEliminated = true;
-
-        if (!GameManager.Instance.isMultiplayer)
-        {
-            isGameEnded = true;
-        }
-        yield return new WaitForSecondsRealtime(1);
-
-        eliminatedPanel.Show();
-
-        yield return new WaitForSecondsRealtime(2);
-
-        eliminatedPanel.Hide();
-
-        if (!GameManager.Instance.isMultiplayer)
-            GameEnd();
-    }
-    [Rpc]
-    private void GameEndRpc()
-    {
-        GameEnd();
-    }
-
-    private void GameEnd()
-    {
-        if (isGameEnded)
-            return;
-
-        eliminatedPanel.ForceHide();
-
-        gameEndPanel.Show();
-        isGameEnded = true;
-
-        /*        int winStat = 3;
-
-                if (localPlayerScore > opponentScore)
-                {
-                    winStat = 1;
-                }
-                else if (localPlayerScore < opponentScore)
-                {
-                    winStat = 2;
-                }
-                WebGLMatchBootstrap.Instance.OnMatchEnd_ReportWin(localPlayerScore, winStat);*/
-    }
-    #endregion
 
     public void GoToHome()
     {
@@ -145,4 +88,101 @@ public class LevelHandler : NetworkBehaviour
 
         SceneManager.LoadScene("Menu");
     }
+
+    #region Callbacks
+    public override void Spawned()
+    {
+        if (Runner.ActivePlayers.Count() < 2)
+        {
+            waitingPanel.SetActive(true);
+        }
+        codeText.text = "CODE: " + Runner.SessionInfo.Name;
+    }
+    public void PlayerJoined(PlayerRef player)
+    {
+        if (Runner.ActivePlayers.Count() == 2)
+        {
+            if (!isGameStarted && Runner.IsSharedModeMasterClient)
+            {
+                Invoke(nameof(RPC_StartGame), 1);
+            }
+            waitingPanel.SetActive(false);
+        }
+    }
+    public void PlayerLeft(PlayerRef player)
+    {
+        if (player != Runner.LocalPlayer)
+        {
+            WebGLMatchBootstrap.Instance.OnMatchAbort_Report("Match Terminated!", "Opponent Left!");
+            GameEnd();
+        }
+    }
+    #endregion
+
+    #region Game End Handler
+    public void OnLocalPlayerWon()
+    {
+        isLocalPlayerWon = true;
+
+        if (!GameManager.Instance.isMultiplayer)
+        {
+            GameEnd();
+        }
+        else
+        {
+            GameEndRpc();
+        }
+    }
+    public void OnLocalPlayerDied()
+    {
+        StartCoroutine(OnLocalPlayerDiedCoroutine());
+    }
+    private IEnumerator OnLocalPlayerDiedCoroutine()
+    {
+        if (GameManager.Instance.isMultiplayer)
+            spectatingPanel.SetActive(true);
+
+        yield return new WaitForSecondsRealtime(1);
+
+        eliminatedPanel.Show();
+
+        yield return new WaitForSecondsRealtime(2);
+
+        eliminatedPanel.Hide();
+
+        if (!GameManager.Instance.isMultiplayer)
+            GameEnd();
+        else
+        {
+            GameObject otherPlayerObject = GameObject.FindGameObjectWithTag("OtherPlayer");
+
+            if (otherPlayerObject != null)
+            {
+                camFollow.player = otherPlayerObject.transform;
+            }
+            else
+            {
+                GameEndRpc();
+            }
+        }
+    }
+    [Rpc]
+    private void GameEndRpc()
+    {
+        GameEnd();
+    }
+
+    private void GameEnd()
+    {
+        if (isGameEnded)
+            return;
+
+        eliminatedPanel.ForceHide();
+
+        gameEndPanel.Show();
+        isGameEnded = true;
+
+        WebGLMatchBootstrap.Instance.OnMatchEnd_ReportWin(isLocalPlayerWon);
+    }
+    #endregion
 }

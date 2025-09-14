@@ -1,9 +1,10 @@
 using DG.Tweening;
+using Fusion;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     [Header("Input")]
     [SerializeField] private InputActionReference moveUpAction;
@@ -40,144 +41,257 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float maxWidth = 0.5f;
     [SerializeField] private float pulseSpeed = 2f;
 
-    private Rigidbody2D rb;
     private bool isUpPressed;
     private bool isGrounded;
     private bool isAtCeiling;
-
     private bool isEliminated = false;
+
+    private bool isMultiplayer = false;
 
     private void Awake()
     {
-        rb = GetComponent<Rigidbody2D>();
-        rb.gravityScale = 0;
-        trailRend = GetComponent<TrailRenderer>();
+        if (trailRend == null)
+            trailRend = GetComponent<TrailRenderer>();
     }
 
     private void OnEnable()
     {
-        moveUpAction.action.performed += OnUpPressed;
-        moveUpAction.action.canceled += OnUpReleased;
+        if (moveUpAction != null)
+        {
+            moveUpAction.action.performed += OnUpPressed;
+            moveUpAction.action.canceled += OnUpReleased;
+        }
     }
 
     private void OnDisable()
     {
-        moveUpAction.action.performed -= OnUpPressed;
-        moveUpAction.action.canceled -= OnUpReleased;
-    }
-
-    private void OnUpPressed(InputAction.CallbackContext ctx) => isUpPressed = true;
-    private void OnUpReleased(InputAction.CallbackContext ctx) => isUpPressed = false;
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.CompareTag("WinTrigger"))
+        if (moveUpAction != null)
         {
-            Win();
+            moveUpAction.action.performed -= OnUpPressed;
+            moveUpAction.action.canceled -= OnUpReleased;
         }
     }
-    private void Win()
+
+    public override void Spawned()
     {
-        transform.DOScale(0, 0.2f).SetEase(Ease.InOutBounce);
-        Destroy(gameObject, 1);
+        if (HasInputAuthority)
+        {
+            if (trailRend != null) trailRend.enabled = true;
+        }
+        else
+        {
+            if (trailRend != null) trailRend.enabled = false;
+
+            if (spriteRend != null)
+            {
+                Color c = spriteRend.color;
+                c.a = 0.5f;
+                spriteRend.color = c;
+            }
+        }
+
+        if (GameManager.Instance != null)
+            isMultiplayer = GameManager.Instance.isMultiplayer;
     }
+
+    #region Input
+    private void OnUpPressed(InputAction.CallbackContext ctx) => isUpPressed = true;
+    private void OnUpReleased(InputAction.CallbackContext ctx) => isUpPressed = false;
+    #endregion
+
+    #region Movement
     private void Update()
     {
-        if (isEliminated)
-            return;
+        if (isEliminated) return;
 
         float t = (Mathf.Sin(Time.time * pulseSpeed * Mathf.PI * 2f) + 1f) / 2f;
         float width = Mathf.Lerp(minWidth, maxWidth, t);
 
-        trailRend.startWidth = width;
-        trailRend.endWidth = width * 0.5f;
+        if (trailRend != null)
+        {
+            trailRend.startWidth = width;
+            trailRend.endWidth = width * 0.5f;
+        }
     }
+
     private void FixedUpdate()
     {
+        if (isMultiplayer)
+            return;
+
+        SimulateMovement(Time.fixedDeltaTime);
+    }
+
+    public override void FixedUpdateNetwork()
+    {
+        if (!isMultiplayer)
+            return;
+
         if (isEliminated)
             return;
 
+        if (!(HasInputAuthority || Object.HasStateAuthority))
+            return;
+
+        float tickDelta = Runner.DeltaTime;
+        SimulateMovement(tickDelta, useRunnerDelta: true);
+    }
+
+    private void SimulateMovement(float deltaTime, bool useRunnerDelta = false)
+    {
+        if (isEliminated) return;
+
         Vector2 pos = transform.position;
 
-        // --- Raycasts ---
         RaycastHit2D hitDown = Physics2D.Raycast(pos, Vector2.down, rayDistance, groundLayer);
         RaycastHit2D hitUp = Physics2D.Raycast(pos, Vector2.up, rayDistance, groundLayer);
 
         isGrounded = hitDown.collider != null && Mathf.Abs(hitDown.distance - halfHeight) < snapTolerance;
         isAtCeiling = hitUp.collider != null && Mathf.Abs(hitUp.distance - halfHeight) < snapTolerance;
 
-        Vector2 velocity = rb.linearVelocity;
-        velocity.x = forwardSpeed;
-
-        if (isUpPressed)
+        if (LevelHandler.Instance != null && LevelHandler.Instance.isGameStarted)
         {
-            if (hitUp.collider != null && hitUp.distance <= halfHeight + snapTolerance)
+            float vx = forwardSpeed;
+            float vy;
+
+            if (isUpPressed)
             {
-                transform.position = new Vector2(pos.x, hitUp.point.y - halfHeight);
-                velocity.y = 0f;
+                if (hitUp.collider != null && hitUp.distance <= halfHeight + snapTolerance)
+                {
+                    pos.y = hitUp.point.y - halfHeight;
+                    vy = 0f;
+                }
+                else
+                {
+                    vy = upForce;
+                }
             }
             else
             {
-                velocity.y = upForce;
+                if (hitDown.collider != null && hitDown.distance <= halfHeight + snapTolerance)
+                {
+                    pos.y = hitDown.point.y + halfHeight;
+                    vy = 0f;
+                }
+                else
+                {
+                    vy = -fallSpeed;
+                }
             }
-        }
-        else
-        {
-            if (hitDown.collider != null && hitDown.distance <= halfHeight + snapTolerance)
-            {
-                transform.position = new Vector2(pos.x, hitDown.point.y + halfHeight);
-                velocity.y = 0f;
-            }
-            else
-            {
-                velocity.y = -fallSpeed;
-            }
-        }
 
-        rb.linearVelocity = velocity;
+            pos.x += vx * deltaTime;
+            pos.y += vy * deltaTime;
+
+            transform.position = new Vector3(pos.x, pos.y, transform.position.z);
+        }
 
         float targetAngle = groundRotation;
 
         if (isAtCeiling)
-        {
             targetAngle = groundRotation;
-        }
         else if (isUpPressed)
-        {
             targetAngle = tiltUpAngle;
-        }
         else if (!isGrounded)
-        {
             targetAngle = tiltDownAngle;
-        }
         else
-        {
             targetAngle = groundRotation;
-        }
 
-        float angle = Mathf.LerpAngle(transform.eulerAngles.z, targetAngle, Time.fixedDeltaTime * tiltSpeed);
-        transform.rotation = Quaternion.Euler(0, 0, angle);
+        float t = deltaTime;
+        float angle = Mathf.LerpAngle(transform.eulerAngles.z, targetAngle, t * tiltSpeed);
+        transform.rotation = Quaternion.Euler(0f, 0f, angle);
 
-
-        Vector2 boxCenter = (Vector2)transform.position + frontBoxOffset;
-        Collider2D hitFront = Physics2D.OverlapBox(boxCenter, frontBoxSize, 0f, obstacleLayer);
-
-        if (hitFront != null && !isEliminated)
+        // front collision detect
+        if (LevelHandler.Instance.isGameStarted)
         {
-            Eliminate();
+            Vector2 boxCenter = (Vector2)transform.position + frontBoxOffset;
+            Collider2D hitFront = Physics2D.OverlapBox(boxCenter, frontBoxSize, 0f, obstacleLayer);
+
+            if (hitFront != null && !isEliminated)
+            {
+                Debug.Log("Player eliminated!");
+
+                if (LevelHandler.Instance != null)
+                    LevelHandler.Instance.OnLocalPlayerDied();
+
+                if (GameManager.Instance.isMultiplayer)
+                {
+                    RPC_Eliminate();
+                }
+                else
+                {
+                    EliminatePlayer();
+                }
+            }
         }
     }
-    private void Eliminate()
+    #endregion
+
+    #region Elimination
+    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+    private void RPC_Eliminate()
     {
+        EliminatePlayer();
+    }
+    private void EliminatePlayer()
+    {
+        if (isEliminated) return;
+
         isEliminated = true;
 
-        eliminationParticle.Play();
-        spriteRend.enabled = false;
-        trailRend.enabled = false;
+        if (eliminationParticle != null)
+            eliminationParticle.Play();
 
-        rb.linearVelocity = Vector2.zero;
+        if (spriteRend != null)
+            spriteRend.enabled = false;
 
-        Debug.Log("Player eliminated!");
+        if (trailRend != null)
+            trailRend.enabled = false;
+
+        if (HasStateAuthority)
+        {
+            Invoke(nameof(DestroySelf), eliminationParticle.main.duration);
+        }
     }
+    #endregion
+
+    #region Winning
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("WinTrigger"))
+        {
+            if (trailRend != null) trailRend.enabled = false;
+
+            if (LevelHandler.Instance != null)
+                LevelHandler.Instance.OnLocalPlayerWon();
+
+            if (GameManager.Instance.isMultiplayer)
+            {
+                RPC_Win();
+            }
+            else
+            {
+                transform.DOScale(0, 0.1f).SetEase(Ease.InOutBounce);
+                Destroy(gameObject, 0.1f);
+            }
+        }
+    }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+    private void RPC_Win()
+    {
+        transform.DOScale(0, 0.1f).SetEase(Ease.InOutBounce);
+
+        if (HasStateAuthority)
+        {
+            Invoke(nameof(DestroySelf), 0.1f);
+        }
+    }
+    private void DestroySelf()
+    {
+        Runner.Despawn(Object);
+    }
+    #endregion
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;

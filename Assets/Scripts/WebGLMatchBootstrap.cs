@@ -41,9 +41,12 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
         {
             Instance = this;
         }
-        TryHandleUrlParamsAndStart();
     }
 
+    private void Start()
+    {
+        TryHandleUrlParamsAndStart();
+    }
     private async void TryHandleUrlParamsAndStart()
     {
         if (GameLife.Instance.isGameplayedFirstTime)
@@ -208,15 +211,17 @@ public class WebGLMatchBootstrap : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    public void OnMatchEnd_ReportWin(int score, int winStat)
+    public void OnMatchEnd_ReportWin(bool isWon)
     {
         string stat = "TIE";
+        int score = 0;
 
-        if (winStat == 1)
+        if (isWon)
         {
             stat = "WON";
+            score = 50;
         }
-        else if (winStat == 2)
+        else
         {
             stat = "LOST";
         }
