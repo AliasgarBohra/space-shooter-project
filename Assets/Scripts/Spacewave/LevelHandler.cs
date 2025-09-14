@@ -54,7 +54,8 @@ public class LevelHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
         {
             WebGLMatchBootstrap.Instance.OnMatchAbort_Report("Match Terminated!", "Something went wrong!");
 
-            Toast.Show("Match Terminated!\nOpponent left! Or Something went wrong!");
+            if (!isGameEnded)
+                Toast.Show("Match Terminated!\nOpponent left! Or Something went wrong!");
 
             GameEnd();
         }
@@ -73,9 +74,10 @@ public class LevelHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
 
         try
         {
-            WebGLMatchBootstrap.Instance.ResetURL();
+            if (WebGLMatchBootstrap.Instance != null)
+                WebGLMatchBootstrap.Instance.ResetURL();
 
-            if (GameManager.Instance.isMultiplayer && Runner != null)
+            if (GameManager.Instance != null && GameManager.Instance.isMultiplayer && Runner != null)
             {
                 Runner.Shutdown();
             }
