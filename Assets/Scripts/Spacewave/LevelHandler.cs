@@ -1,3 +1,4 @@
+using EasyUI.Toast;
 using Fusion;
 using System.Collections;
 using System.Linq;
@@ -53,7 +54,9 @@ public class LevelHandler : NetworkBehaviour, IPlayerJoined, IPlayerLeft
         {
             WebGLMatchBootstrap.Instance.OnMatchAbort_Report("Match Terminated!", "Something went wrong!");
 
-            GoToHome();
+            Toast.Show("Match Terminated!\nOpponent left! Or Something went wrong!");
+
+            GameEnd();
         }
     }
 

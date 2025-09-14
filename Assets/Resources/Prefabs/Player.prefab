@@ -239,7 +239,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4883439652534908482}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -305,7 +305,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 015822cac23ae374f897881d62a84b08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isMultiplayer: 0
   moveUpAction: {fileID: 1776206788370285655, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   spriteRend: {fileID: 2904887378436725888}
   eliminationParticle: {fileID: 811522458661638680}
